@@ -27,6 +27,13 @@ page=page.replaceAll('BIM — مدينة التنسيق','BIM CITY — مدين�
 .replaceAll('href="?game=bim"','href="bim-city.html"')
 .replaceAll('<a class="primary-btn" href="?game=plane">ابدأ بالطيران','<a class="primary-btn" href="bim-city.html">ادخل BIM City');
 }
+if(play){
+ // External shared achievement coach. The original game engine and save keys remain untouched.
+ const coachTag='<'+'script src="game-coach.js" defer></'+'script>';
+ page=page.replace('</body>',coachTag+'</body>');
+}else{
+ page=page.replace('</body>','<a href="game-hub.html" style="position:fixed;bottom:18px;left:18px;z-index:9999;background:#123d4a;color:#e4fcf4;border:1px solid #7fe3d0;border-radius:24px;padding:11px 18px;font:700 13px system-ui;box-shadow:0 8px 28px #0008;text-decoration:none">🎮 مركز الألعاب الـ16</a></body>');
+}
 document.open();document.write(page);document.close();}
 catch(e){document.getElementById('loading').innerHTML='<h1>تعذر تشغيل اللعبة</h1><p>استخدم Chrome أو Edge حديثًا.</p><pre></pre>';document.querySelector('pre').textContent=e.message;}
 })();
