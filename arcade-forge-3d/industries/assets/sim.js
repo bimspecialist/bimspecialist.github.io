@@ -1,5 +1,7 @@
 import {WorldRenderer,clamp,hash} from './renderer.js';
 import {POLICIES,missionView,completeMission,normalizeMission,normalizePolicy} from './gameplay.js';
+import {activeIncident,chooseIncident,normalizeIncidents} from './decisions.js';
+import {setSound,soundEnabled,playTone} from './sound.js';
 const $=id=>document.getElementById(id),money=n=>Math.round(n).toLocaleString('en-US'),now=()=>Date.now(),key=new URLSearchParams(location.search).get('game')||'factory';
 const G={
  factory:{name:'إمبراطورية المصانع',tag:'MANUFACTURING / SUPPLY CHAIN',icon:'⚙',initial:2200,accent:'#eeb56b',intro:'شغّل خطوط الإنتاج دون توقف: وازن بين الخام والطاقة والطلبات. كل منتج يحتاج قرارًا، وليس ضغطًا عشوائيًا.',init:{raw:10,products:0,power:100,orders:0,waste:0,ordersPending:2},upgrades:[['machines','المكائن الدقيقة','زيادة الإنتاج لكل دورة',640,1.75,4],['warehouse','مخازن أكبر','مخزون خام أوسع وكفاءة توريد',450,1.65,4],['logistics','سلسلة التوريد','عقود بيع أعلى قيمة',780,1.8,4]],worldTasks:[['المواد الخام',-12,0,8],['خط الإنتاج',4,0,-1],['ساحة الشحن',18,0,10]]},
@@ -14,23 +16,23 @@ const qualityKey='arcade-forge-graphics-v2';
 function empty(){return {version:1,cash:cfg.initial,earned:0,exp:0,level:1,rating:78,up:{},time:0,created:now(),lastTick:now(),...JSON.parse(JSON.stringify(cfg.init))}}
 let S=empty();try{let r=JSON.parse(localStorage.getItem(saveKey)||'null');if(r&&r.version===1)S={...S,...r,up:r.up||{}}}catch{};
 // Migration: retain all v1 balances, upgrades and progress. Add only missing v2 fields.
-S.mission=normalizeMission(key,S);S.policy=normalizePolicy(key,S.policy);
+S.mission=normalizeMission(key,S);S.policy=normalizePolicy(key,S.policy);normalizeIncidents(S);
 let visuals='balanced';try{visuals=localStorage.getItem(qualityKey)||'balanced'}catch{}
 if(!['balanced','high','eco'].includes(visuals))visuals='balanced';
 let lastMissionReady=false;
 
 function store(){try{localStorage.setItem(saveKey,JSON.stringify(S))}catch{}};
 function lvl(){S.level=1+Math.floor(Math.sqrt(Math.max(0,S.exp)/380));}
-function gain(v,msg=''){S.cash+=Math.round(v);if(v>0){S.earned+=v;S.exp+=v*.3;lvl()}if(msg)notify((v>=0?'+':'')+money(v)+' — '+msg,v<0)};
+function gain(v,msg=''){S.cash+=Math.round(v);if(v>0){S.earned+=v;S.exp+=v*.3;lvl()}if(msg){notify((v>=0?'+':'')+money(v)+' — '+msg,v<0);playTone(v<0?'error':'success')}};
 function notify(s,error=false){const t=$('toast');t.textContent=s;t.className='toast show'+(error?' error':'');clearTimeout(toastTimer);toastTimer=setTimeout(()=>t.className='toast',3000)}
 function verifyMission(){const m=missionView(key,S);if(m.ready&&!lastMissionReady)notify('اكتمل '+m.title+' — استلم مكافأتك!');lastMissionReady=m.ready}
-function claimMission(){const prize=completeMission(key,S);if(!prize.claimed){notify('أكمل أهداف العقد أولًا',true);return}gain(prize.reward,'مكافأة إتمام العقد');S.rating=clamp(S.rating+2,0,100);S.exp+=120;lvl();lastMissionReady=false;store();renderUI()}
-function setPolicy(id){if(locked){notify('أكمل العملية الجارية قبل تغيير استراتيجية التشغيل',true);return}const found=POLICIES[key].find(p=>p.id===id);if(!found||S.policy===id)return;S.policy=id;S.rating=clamp(S.rating,0,100);notify('تم اعتماد استراتيجية: '+found.name);store();renderUI()}
+function claimMission(){const prize=completeMission(key,S);if(!prize.claimed){notify('أكمل أهداف العقد أولًا',true);return}gain(prize.reward,'مكافأة إتمام العقد');S.rating=clamp(S.rating+2,0,100);S.exp+=120;lvl();lastMissionReady=false;playTone('success');store();renderUI()}
+function setPolicy(id){if(locked){notify('أكمل العملية الجارية قبل تغيير استراتيجية التشغيل',true);return}const found=POLICIES[key].find(p=>p.id===id);if(!found||S.policy===id)return;S.policy=id;S.rating=clamp(S.rating,0,100);notify('تم اعتماد استراتيجية: '+found.name);playTone('click');store();renderUI()}
 $('claimMission').onclick=claimMission;
 
 function spend(v){if(S.cash<v){notify('الرصيد غير كافٍ لهذه العملية',true);return false}S.cash-=v;return true}
 function lv(id){return S.up[id]||0};function cost(u){return Math.round(u[3]*Math.pow(u[4],lv(u[0])))}
-function upgrade(id){const u=cfg.upgrades.find(x=>x[0]===id);if(!u||lv(id)>=u[5])return;if(!spend(cost(u)))return;S.up[id]=(S.up[id]||0)+1;if(key==='hotel'&&id==='rooms')S.clean+=3;S.rating=clamp(S.rating+1,0,100);S.exp+=120;lvl();notify('تمت ترقية '+u[1]);store();renderUI()}
+function upgrade(id){const u=cfg.upgrades.find(x=>x[0]===id);if(!u||lv(id)>=u[5])return;if(!spend(cost(u)))return;S.up[id]=(S.up[id]||0)+1;if(key==='hotel'&&id==='rooms')S.clean+=3;S.rating=clamp(S.rating+1,0,100);S.exp+=120;lvl();notify('تمت ترقية '+u[1]);playTone('success');store();renderUI()}
 const requireCond=(c,msg)=>{if(!c){notify(msg,true);return false}return true};
 function job(id){if(locked)return;let speed=1,delay=0,cb=null;
  if(key==='factory'){
@@ -63,7 +65,7 @@ function job(id){if(locked)return;let speed=1,delay=0,cb=null;
   if(id==='sell'){if(!requireCond(S.refined>0,'لا توجد سبائك جاهزة للبيع'))return;const qty=S.refined;S.refined=0;S.sold+=qty;gain(qty*(390+Math.max(15,S.grade+(S.policy==='selective'?10:-12))*3+lv('fleet')*70),'بيعت السبائك للمصانع');S.rating=clamp(S.rating+2,0,100)}
   if(id==='repair'){if(!spend(175))return;S.wear=Math.max(0,S.wear-55);notify('تمت صيانة الحفّارات والناقلات')}
  }
- if(delay&&cb){locked=true;taskTimers[id]=now()+delay*1000;renderUI();const run=session;setTimeout(()=>{if(run!==session)return;locked=false;taskTimers={};cb();verifyMission();store();renderUI()},delay*1000)}else{verifyMission();store();renderUI()}
+ if(delay&&cb){locked=true;taskTimers[id]=now()+delay*1000;renderUI();const run=session;setTimeout(()=>{if(run!==session)return;locked=false;taskTimers={};cb();S.actionsSinceIncident=Math.min(3,S.actionsSinceIncident+1);playTone('success');verifyMission();store();renderUI()},delay*1000)}else{S.actionsSinceIncident=Math.min(3,S.actionsSinceIncident+1);playTone('click');verifyMission();store();renderUI()}
 }
 function actions(){switch(key){
  case 'factory':return [['supply','توريد مواد خام','اشترِ 12 وحدة خام للتشغيل.','290 $',S.cash>=290,100],['produce','تشغيل خط الإنتاج',`${S.policy==='lean'?2:3} خام + ${S.policy==='lean'?7:12} طاقة ← منتجات جاهزة`,'دورة تصنيع',S.raw>=3&&S.power>=9, S.raw?100:0],['ship','شحن المنتجات','سلّم منتجين واحصل على قيمة العقد.','+'+(660+lv('logistics')*190)+' $',S.products>=2,S.products*50],['energy','صيانة الكهرباء','استعادة 45 من طاقة المصنع.','150 $',S.cash>=150&&S.power<95,S.power]];
@@ -79,19 +81,39 @@ function metrics(){switch(key){
  case 'engineering':return [['المناقصات',S.leads],['اللوحات',S.drawings+'/3'],['التعارضات',S.clashes],['عقود مسلّمة',S.delivered]];
  case 'mine':return [['رواسب مكتشفة',S.deposit+' طن'],['خام مستخرج',S.ore+' طن'],['سبائك جاهزة',S.refined],['تآكل الآلات',S.wear+'%']];
  }}
-function renderUI(){document.title=cfg.name+' | Arcade Forge';$('worldIcon').textContent=cfg.icon;$('worldName').textContent=cfg.name;$('worldTag').textContent=cfg.tag;$('money').textContent=money(S.cash)+' $';$('level').textContent=S.level;$('rating').textContent=S.rating+'%';$('panelTitle').textContent=cfg.name;$('panelDescription').textContent=cfg.intro;
+function showIncident(){
+ if(locked){notify('أكمل العملية الجارية أولاً',true);return}
+ const ev=activeIncident(key,S);if(!ev){notify('نفّذ 3 عمليات لفتح قرار ميداني جديد',true);return}
+ $('incidentTitle').textContent=ev.title;$('incidentDesc').textContent=ev.body;
+ $('incidentChoices').replaceChildren(...ev.choices.map((c,i)=>{
+  const button=document.createElement('button');button.type='button';button.className='incident-choice';
+  const title=document.createElement('b');title.textContent=c.label;const summary=document.createElement('small');summary.textContent=c.summary;
+  button.append(title,summary);
+  button.disabled=(c.effect.cash||0)<0&&S.cash<-(c.effect.cash||0);
+  button.onclick=()=>{const result=chooseIncident(key,S,i);if(!result.ok){notify(result.error,true);return}lvl();playTone('event');$('incidentDialog').hidden=true;notify('قرارك: '+result.choice);store();renderUI()};
+  return button;
+ }));
+ $('incidentDialog').hidden=false;
+}
+$('openIncident').onclick=showIncident;
+$('closeIncident').onclick=()=>$('incidentDialog').hidden=true;
+$('incidentDialog').addEventListener('click',e=>{if(e.target===$('incidentDialog'))$('incidentDialog').hidden=true});
+function toggleSound(){setSound(!soundEnabled());for(const id of ['soundToggle','mobileSoundToggle'])$(id).textContent=soundEnabled()?'الصوت: يعمل':'الصوت: مغلق';playTone('click')}
+$('soundToggle').onclick=toggleSound;$('mobileSoundToggle').onclick=toggleSound;
+function renderUI(){document.title=cfg.name+' | Arcade Forge';$('worldIcon').textContent=cfg.icon;$('worldName').textContent=cfg.name;$('worldTag').textContent=cfg.tag;$('money').textContent=money(S.cash)+' $';$('level').textContent=S.level;$('rating').textContent=S.rating+'%';const inc=activeIncident(key,S);$('incidentIndicator').textContent=inc?'قرار ميداني متاح':'القرار بعد '+(3-S.actionsSinceIncident)+' عمليات';$('openIncident').disabled=!inc||locked;
+ $('panelTitle').textContent=cfg.name;$('panelDescription').textContent=cfg.intro;
  const m=missionView(key,S);const mission=$('missionBar');$('missionStage').textContent='المستوى '+m.stage;$('missionName').textContent=m.title;$('missionDesc').textContent=m.description+' المكافأة: '+money(m.reward)+' $';$('missionCounter').textContent=m.current+' / '+m.target;$('missionProgress').style.width=m.progress+'%';mission.setAttribute('aria-valuenow',m.progress);$('claimMission').disabled=!m.ready;document.querySelector('.mission').classList.toggle('ready',m.ready);
  $('strategies').innerHTML=POLICIES[key].map(p=>`<button class="strategy-option" data-policy="${p.id}" aria-pressed="${S.policy===p.id}"><strong>${p.name}</strong><small>${p.desc}</small></button>`).join('');document.querySelectorAll('[data-policy]').forEach(b=>b.onclick=()=>setPolicy(b.dataset.policy));
  $('metrics').innerHTML=metrics().map(([l,v])=>`<div class="metric"><small>${l}</small><b>${v}</b></div>`).join('');const a=actions();$('workCount').textContent=a.length+' عمليات';$('workList').innerHTML=a.map(([id,name,desc,value,enabled,pr])=>`<div class="work-card ${enabled?'active':''}" id="card-${id}"><div class="work-top"><h4>${name}</h4><span class="small-tag">${value}</span></div><p>${desc}</p><div class="progress"><span style="width:${clamp(pr,0,100)}%"></span></div><div class="bottom"><small class="work-value">${taskTimers[id]?'العملية جارية…':enabled?'جاهز للتنفيذ':'ينقص شرط التشغيل'}</small><button class="action-btn" data-act="${id}" ${!enabled||locked?'disabled':''}>${taskTimers[id]?'جارٍ…':'تنفيذ'}</button></div></div>`).join('');$('upgradeList').innerHTML=cfg.upgrades.map(u=>{const level=lv(u[0]),price=cost(u),max=level>=u[5];return `<div class="upgrade-card"><h4>${u[1]} <span style="color:#81dcd0">${level}/${u[5]}</span></h4><p>${u[2]}</p><div class="bottom"><b>${max?'مكتمل':money(price)+' $'}</b><button class="buy-btn" data-up="${u[0]}" ${max||price>S.cash||locked?'disabled':''}>${max?'مكتمل':'تطوير'}</button></div></div>`}).join('');document.querySelectorAll('[data-act]').forEach(b=>b.onclick=()=>job(b.dataset.act));document.querySelectorAll('[data-up]').forEach(b=>b.onclick=()=>upgrade(b.dataset.up));$('status').textContent=locked?'● العمليات قيد التنفيذ':'● تشغيل '+cfg.name;if(selected>=0){$('selectedTag').hidden=false;$('selectedTag').textContent=cfg.worldTasks[selected][0]}else $('selectedTag').hidden=true;
 }
-$('saveNow').onclick=()=>{store();notify('تم حفظ التقدم على هذا المتصفح')};$('restart').onclick=()=>$('confirm').hidden=false;$('cancelRestart').onclick=()=>$('confirm').hidden=true;$('confirmRestart').onclick=()=>{localStorage.removeItem(saveKey);S=empty();S.mission=normalizeMission(key,S);S.policy=normalizePolicy(key);session++;selected=-1;locked=false;taskTimers={};lastMissionReady=false;$('confirm').hidden=true;renderUI();notify('بدأت مسيرة جديدة في عالم '+cfg.name)};
+$('saveNow').onclick=()=>{store();notify('تم حفظ التقدم على هذا المتصفح')};$('restart').onclick=()=>$('confirm').hidden=false;$('cancelRestart').onclick=()=>$('confirm').hidden=true;$('confirmRestart').onclick=()=>{localStorage.removeItem(saveKey);S=empty();S.mission=normalizeMission(key,S);S.policy=normalizePolicy(key);normalizeIncidents(S);session++;selected=-1;locked=false;taskTimers={};lastMissionReady=false;$('confirm').hidden=true;renderUI();notify('بدأت مسيرة جديدة في عالم '+cfg.name)};
 $('resetCamera').onclick=()=>{cam={yaw:-.66,pitch:.54,zoom:63};notify('أُعيد ضبط زاوية التصوير')};$('zoomIn').onclick=()=>cam.zoom=clamp(cam.zoom-7,24,105);$('zoomOut').onclick=()=>cam.zoom=clamp(cam.zoom+7,24,105);$('camLeft').onclick=()=>cam.yaw-=.24;$('camRight').onclick=()=>cam.yaw+=.24;
 const graphics=$('graphics');graphics.value=visuals;
 graphics.onchange=()=>{visuals=graphics.value;try{localStorage.setItem(qualityKey,visuals)}catch{};notify('تم تغيير مستوى جودة العرض')};
 window.addEventListener('keydown',e=>{if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement?.tagName))return;
  if(e.key==='ArrowRight'){cam.yaw+=.12;e.preventDefault()}else if(e.key==='ArrowLeft'){cam.yaw-=.12;e.preventDefault()}
  else if(e.key==='+'||e.key==='='){cam.zoom=clamp(cam.zoom-4,24,105)}else if(e.key==='-'){cam.zoom=clamp(cam.zoom+4,24,105)}
- else if(e.key==='Enter'&&missionView(key,S).ready){claimMission()}
+ else if(e.key.toLowerCase()==='e'&&activeIncident(key,S)){showIncident()}else if(e.key==='Escape'){$('incidentDialog').hidden=true}else if(e.key==='Enter'&&missionView(key,S).ready){claimMission()}
 });
 window.addEventListener('pagehide',store);
 const canvas=$('canvas');const pointer={x:0,y:0};function selectScene(){// Click a projected facility marker or its vicinity.
@@ -116,7 +138,8 @@ function buildAirport(r,t){r.box(-1,.06,-18,13,.1,125,'#343f4e');r.box(-1.5,.17,
 function buildingFrame(r,levels=3){r.box(8,.12,0,23,.25,20,'#b4b6ae');for(let floor=0;floor<levels;floor++){let y=.5+floor*4;r.box(8,y,0,21,.35,19,'#abb2ad');for(let x of [-2,8,18])for(let z of [-8,0,8])r.box(x,y+2,z,.6,4,.6,'#889395');for(let x of [-2,8,18])r.beam(x,y+4,-8,x,y+4,8,.25,'#c2ccc5');for(let z of [-8,8])r.beam(-2,y+4,z,18,y+4,z,.25,'#c2ccc5')}r.box(8,levels*4+.3,0,22,.35,20,'#b9c1b9')}
 function buildEngineering(r,t){r.box(-16,5,8,17,10,18,'#cbd4ce');r.box(-16,10.4,8,18,.8,19,'#495c6b');for(let y=2;y<10;y+=3)for(let z=1;z<16;z+=3.7)r.box(-7.36,y,z,.12,2.2,2.2,'#387c8b');r.box(-16,1.9,17.15,3,3.4,.14,'#3b7b8d');buildingFrame(r,Math.max(1,S.contracts?Math.ceil(S.drawings/1.5):S.delivered?3:1));r.box(1,12,13,.55,24,.55,'#d4bd71');r.beam(-8,23,13,20,23,13,.3,'#d3bb7d');r.beam(10,23,13,10,10,13,.13,'#6b6c64');r.box(10,10,13,2,.6,3,'#bcae7b');r.box(-24,.4,-14,10,.8,5,'#526473');car(r,-23,-18,'#e0b562');r.box(19,1.3,-13,9,2,4,'#aebdbd');for(let i=0;i<3;i++)r.box(16+i*2,.5,-13,1.4,.3,3,'#738a8d')}
 function buildMine(r,t){for(let i=0;i<11;i++){let a=i/11*Math.PI*2,radius=24+i%2*5;r.pyramid(Math.sin(a)*radius,-.2,Math.cos(a)*radius,19,6+i%3*4,19,'#a88d65')}for(let i=0;i<4;i++){r.cylinder(5,-.4-i*.22,-4,7-i*1.2,8-i, .8, i%2?'#615144':'#887055',18)}r.cylinder(5,-1.15,-4,3.4,4.1,.3,'#4b403a',18);for(let i=0;i<7;i++){let x=-15+i*5;r.box(x,.3,15,4,.6,2.8,'#5a5e56');r.box(x,1,15,4,.4,3,'#9aa09a')}r.box(20,4,8,13,8,14,'#9f9682');r.box(20,8.6,8,14,.65,15,'#655e54');r.cylinder(20,9,8,2.2,2.2,2,'#c6b484',12);for(let i=0;i<3;i++)r.cylinder(16+i*3,2,-2,1.2,1.2,4,'#72746d',12);r.beam(-15,3,0,18,3,8,.35,'#a8aba2');r.box(7,1,17,8,2.7,4,'#dca94e');for(let i=0;i<Math.min(6,S.refined);i++)r.box(13+i%3*1.25,.45+Math.floor(i/3)*.7,11,1,.65,1,'#d6b874');r.box(2,2,17,3,2,3,'#a9af9c');for(let x of [2.8,11])for(let z of [15.5,18.5])r.sphere(x,.4,z,.62,'#2c3438',8,4);let qty=4+Math.min(7,S.ore);for(let i=0;i<qty;i++)r.sphere(-14+i%4*2,.8+Math.floor(i/4)*1.2,10+Math.floor(i/4)*2,.9,i%2?'#987d64':'#bd9a68',7,5)}
-function draw(){if(!renderer)return;renderer.resize(visuals==='high'?1.8:visuals==='eco'?1:1.35);clock+=.016;const fog=key==='mine'?'#bdbea7':key==='airport'?'#a7cbe0':key==='hotel'?'#bdd3d3':'#a4bfcb';renderer.clear(fog);scenery(renderer);if(key==='factory')buildFactory(renderer,clock);else if(key==='hotel')buildHotel(renderer,clock);else if(key==='airport')buildAirport(renderer,clock);else if(key==='engineering')buildEngineering(renderer,clock);else buildMine(renderer,clock);cfg.worldTasks.forEach((a,i)=>{let x=a[1],y=a[2],z=a[3],c=i===selected?'#b5f6d5':'#86d7da';renderer.cylinder(x,y+6+Math.sin(clock*1.7+i)*.25,z,.32,.32,2,c,10);renderer.disc(x,y+4.65,z,1.5,i===selected?'#7ad7c6':'#3b7180')});let ph=cam.pitch;let eye=[Math.sin(cam.yaw)*Math.cos(ph)*cam.zoom,3+Math.sin(ph)*cam.zoom,Math.cos(cam.yaw)*Math.cos(ph)*cam.zoom];renderer.draw(eye,[0,3,0],{fog,fogStart:70,fogEnd:255,far:450,fov:65});}
+let baseScenery=null,baseScenerySize=null;
+function draw(){if(!renderer)return;renderer.resize(visuals==='high'?1.8:visuals==='eco'?1:1.35);clock+=.016;const fog=key==='mine'?'#bdbea7':key==='airport'?'#a7cbe0':key==='hotel'?'#bdd3d3':'#a4bfcb';renderer.clear(fog);const size=innerWidth<700?'small':'large';if(!baseScenery||baseScenerySize!==size){scenery(renderer);baseScenery=renderer.arr.slice();baseScenerySize=size}else renderer.arr=baseScenery.slice();if(key==='factory')buildFactory(renderer,clock);else if(key==='hotel')buildHotel(renderer,clock);else if(key==='airport')buildAirport(renderer,clock);else if(key==='engineering')buildEngineering(renderer,clock);else buildMine(renderer,clock);cfg.worldTasks.forEach((a,i)=>{let x=a[1],y=a[2],z=a[3],c=i===selected?'#b5f6d5':'#86d7da';renderer.cylinder(x,y+6+Math.sin(clock*1.7+i)*.25,z,.32,.32,2,c,10);renderer.disc(x,y+4.65,z,1.5,i===selected?'#7ad7c6':'#3b7180')});let ph=cam.pitch;let eye=[Math.sin(cam.yaw)*Math.cos(ph)*cam.zoom,3+Math.sin(ph)*cam.zoom,Math.cos(cam.yaw)*Math.cos(ph)*cam.zoom];renderer.draw(eye,[0,3,0],{fog,fogStart:70,fogEnd:255,far:450,fov:65});}
 let renderSlow=false;try{renderer=new WorldRenderer(canvas);draw();}catch(e){$('rendererError').hidden=false;console.error('WebGL:',e);renderSlow=true}
 let frameCount=0,fpsStart=0;
 function loop(t){
