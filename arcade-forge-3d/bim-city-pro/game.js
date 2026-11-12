@@ -1,4 +1,4 @@
-import * as THREE from 'https://cdn.jsdelivr.net/npm/three@0.183.0/build/three.module.js';
+import * as THREE from './vendor/three.module.js';
 import {SAVE_KEY,newGame,normalized,clamp,distance,terrainDepth,PIT,STOCK,DUMP,FOUNDATION,START_POS,dig,load,unload,pour,restartContract,buyUpgrade,truckPhysics,phaseText} from './core.js';
 
 const $=id=>document.getElementById(id), format=n=>Math.round(n).toLocaleString('en-US');
