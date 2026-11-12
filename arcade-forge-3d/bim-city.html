@@ -627,4 +627,4 @@ function loop(now){let dt=Math.min(.047,(now-last)/1000||.016);last=now;try{upda
 try{renderer=new WorldRenderer(canvas);bind();cameraFollow(machines.excavator,true);drawHUD();if(data.phase>=4){paused=true;$('winDetails').textContent='العقد مكتمل. يمكنك بدء عقد جديد أو التجول في المدينة.';$('win').hidden=false;}loop(performance.now());}catch(err){console.error(err);$('fallback').hidden=false;$('errorText').textContent=err.message;}
 })();
 
-</script></body></html>
+</script><script src="enhancements.js" defer></script></body></html>
