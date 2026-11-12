@@ -8,6 +8,13 @@ const chosen=params.get('game');
 if(chosen==='bim'){location.replace(new URL('bim-city.html',location.href).href);return}
 const play=params.has('game');
 let page=await unpack(play?game:home);
+if(play){
+  // Shared lightweight lighting pass for the ten legacy exploration games.
+  page=page.replace('float skyAmbient=mix(.43,.77,clamp(n.y*.5+.5,0.,1.));','float skyAmbient=mix(.48,.81,clamp(n.y*.5+.5,0.,1.));');
+  page=page.replace('vec3 color=vCol*(skyAmbient+softBounce+(.64*d)*vec3(1.07,1.01,.91));','vec3 color=vCol*(skyAmbient+softBounce+(.71*d)*vec3(1.08,1.03,.94));');
+  page=page.replace('float glint=pow(max(dot(n,h),0.),42.)*.22*d;','float glint=pow(max(dot(n,h),0.),48.)*.27*d;');
+  page=page.replace('color=pow(max(color,vec3(0.)),vec3(.96));','color=pow(max(color,vec3(0.)),vec3(.94));');
+}
 if(!play){
 page=page.replace('<nav class="nav">','<nav class="nav"><a href="industries/index.html">ألعاب التطوير الجديدة</a>');
 page=page.replace('<div class="hero-actions">','<div class="hero-actions"><a href="industries/index.html" class="primary-btn" style="background:linear-gradient(115deg,#69e6cc,#85c5fb);color:#081a26">5 ألعاب إدارة جديدة</a>');
