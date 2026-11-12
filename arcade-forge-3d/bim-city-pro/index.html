@@ -1,0 +1,30 @@
+<!doctype html><html lang="ar" dir="rtl"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="theme-color" content="#081016">
+<meta name="description" content="BIM City PRO — محاكاة هندسية ثلاثية الأبعاد للمتصفح بخامات PBR وموقع بناء وعقود معدات.">
+<title>BIM CITY PRO | Construction Simulator Web</title>
+<link rel="stylesheet" href="style.css">
+</head><body>
+<main id="app">
+  <canvas id="view" aria-label="مشهد BIM City ثلاثي الأبعاد"></canvas>
+  <div class="gradient" aria-hidden="true"></div>
+  <header class="nav">
+    <a class="brand" href="../game-hub.html"><span class="brand-mark">B<span>+</span></span><span><b>BIM CITY <em>PRO</em></b><small>CONSTRUCTION OPERATIONS / WEB</small></span></a>
+    <nav><a href="../game-hub.html">جميع الألعاب</a><a href="../bim-city.html">الإصدار السابق</a></nav>
+    <div class="nav-right"><span class="status-light">● <span id="status">تحميل المشهد</span></span><button id="settingsToggle" class="small-btn">الإعدادات <span>⚙</span></button></div>
+  </header>
+  <section class="stats" aria-label="إحصائيات اللعبة">
+    <div><small>رصيد الشركة</small><strong id="cash">$2,500</strong></div><div><small>الأرباح</small><strong id="earned">$0</strong></div><div><small>العمليات المنجزة</small><strong id="contracts">0</strong></div><div><small>الأداء</small><strong id="fps">— FPS</strong></div>
+  </section>
+  <section class="mission" aria-label="العقد الحالي"><div class="section-overline">عقد رقم <span id="contractNo">01</span> · موقع الأعمال</div><div class="mission-header"><h1 id="missionName">تجهيز الموقع والحفر</h1><b id="missionPct">0%</b></div><p id="missionDetail">احفر 12 م³ باستخدام الحفار</p><div class="meter"><div id="missionBar"></div></div><div class="mission-footer"><span>حجم المهمة</span><strong id="missionValue">0 / 12 م³</strong></div></section>
+  <section class="machine-panel"><div class="section-overline">المعدات المتاحة</div><div class="machine-choices">
+    <button class="machine active" data-machine="excavator"><span class="machine-number">01</span><b>حفّار</b><small>هيدروليك</small></button>
+    <button class="machine" data-machine="truck"><span class="machine-number">02</span><b>قلّاب</b><small>نقل التربة</small></button>
+    <button class="machine" data-machine="mixer"><span class="machine-number">03</span><b>خلاطة</b><small>خرسانة</small></button>
+  </div><div class="machine-meta"><div><span>المعدات</span><b id="machineName">حفّار هيدروليكي</b></div><div><span>الحمولة</span><b id="load">0.0 م³</b></div></div><button class="action-btn" id="action">تنفيذ الحفر <span>SPACE</span></button><div id="feedback" role="status" class="feedback">استخدم الأسهم أو WASD للقيادة، واسحب المشهد لتدوير الكاميرا.</div>
+  </section>
+  <div class="bottom-bar"><div><b id="region">NORTH SECTOR / SITE A-17</b><small id="coord">X 0.0 · Z 0.0</small></div><div class="control-hints"><span>WASD قيادة</span><span>Q/E الذراع</span><span>SPACE تنفيذ</span><span>1/2/3 تغيير المعدات</span><span>V الكاميرا</span></div></div>
+  <div class="right-tools"><button id="cameraBtn" aria-label="تغيير منظور الكاميرا">◉ <span>كاميرا</span></button><button id="mapBtn" aria-label="الانتقال إلى موقع المهمة">⌖ <span>توجيه</span></button><button id="soundBtn" aria-label="تبديل صوت المحرك">♫ <span>صوت</span></button></div>
+  <aside class="settings" id="settings" hidden><div class="settings-head"><b>إعدادات العرض</b><button id="closeSettings" aria-label="إغلاق">×</button></div><label>مستوى التفاصيل<select id="quality"><option value="high">مرتفع — ظل وتفاصيل</option><option value="balanced">متوازن</option><option value="eco">اقتصادي — للجوال</option></select></label><div class="setting-info">تعمل الخامات والإضاءة محليًا. يستخدم الموقع Three.js المرخّص MIT مع خامات PBR مولّدة، ويمكن إضافة خامات CC0 فوتوغرافية مستقبلًا.</div><div class="settings-upgrades"><strong>ورشة تطوير المعدات</strong><button data-upgrade="hydraulics" id="hydraulicsUpgrade">ترقية الهيدروليك — $850</button><button data-upgrade="engine" id="engineUpgrade">ترقية المحرك — $950</button></div><button id="reset" class="reset-btn">بداية مشروع جديد (يحذف تقدم هذه اللعبة فقط)</button></aside>
+  <div class="mobile-controls" aria-label="عناصر التحكم باللمس"><div class="dpad"><button data-hold="left">◀</button><button data-hold="forward">▲</button><button data-hold="back">▼</button><button data-hold="right">▶</button></div><div class="mobile-right"><button id="mobileSwitch">معدات ↻</button><button id="mobileAction">تنفيذ ✓</button></div></div>
+  <div class="loading" id="loading"><div class="loader-ring"></div><h2>BIM CITY PRO</h2><p id="loadingText">جارٍ تجهيز موقع البناء ثلاثي الأبعاد…</p><a href="../bim-city.html">فتح النسخة السابقة</a></div>
+</main><script type="module" src="game.js"></script></body></html>
