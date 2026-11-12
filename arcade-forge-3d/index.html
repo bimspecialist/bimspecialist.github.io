@@ -10,6 +10,15 @@ const play=params.has('game');
 let page=await unpack(play?game:home);
 if(play){
   // Shared lightweight lighting pass for the ten legacy exploration games.
+  // Individual natural-light directions keep the ten worlds visually distinct.
+  const lighting={
+   rocket:[.68,.81,.25],plane:[.35,.89,.30],car:[.57,.77,.28],
+   sub:[.23,.68,.61],drill:[.61,.72,.19],starship:[.78,.67,.31],
+   balloon:[.42,.91,.25],architect:[.48,.84,.31],
+   structure:[.60,.82,.27],mep:[.40,.88,.28]
+  };
+  const sun=lighting[chosen];
+  if(sun)page=page.replace('vec3 sun=normalize(vec3(.48,.82,.31));','vec3 sun=normalize(vec3('+sun.join(',')+'));');
   page=page.replace('float skyAmbient=mix(.43,.77,clamp(n.y*.5+.5,0.,1.));','float skyAmbient=mix(.48,.81,clamp(n.y*.5+.5,0.,1.));');
   page=page.replace('vec3 color=vCol*(skyAmbient+softBounce+(.64*d)*vec3(1.07,1.01,.91));','vec3 color=vCol*(skyAmbient+softBounce+(.71*d)*vec3(1.08,1.03,.94));');
   page=page.replace('float glint=pow(max(dot(n,h),0.),42.)*.22*d;','float glint=pow(max(dot(n,h),0.),48.)*.27*d;');
