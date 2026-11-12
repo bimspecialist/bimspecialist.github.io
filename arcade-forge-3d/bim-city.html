@@ -14,8 +14,8 @@
 @media(max-width:670px){.topbar{inset:7px 8px auto;gap:5px}.logo{padding:7px 10px;gap:6px}.mark{height:28px;width:28px;font-size:13px}.logo h1{font-size:11px}.logo small{font-size:8px}.top-metrics{gap:3px}.metric{min-width:67px;padding:6px 7px;border-radius:9px}.metric b{font-size:12px}.metric small{font-size:8px}.outline-btn{padding:8px 9px;font-size:11px}#panel{right:7px;top:68px;width:min(60vw,258px);max-height:215px;overflow:hidden}.mission{padding:9px}.mission h2{font-size:15px;margin:4px 0}.mission p{font-size:10px;line-height:1.5;margin:0 0 4px}.mission .task:nth-of-type(n+3){display:none}.mission .hint{font-size:10px;padding:5px;margin-top:4px}.mission .bar{margin:3px 0 5px}.mission .task{padding:3px 0;font-size:10px}.mission .task i{width:19px;height:19px}#minimap{left:6px;top:68px;width:100px;height:100px}#instrument{left:7px;bottom:181px;min-width:100px;padding:7px}#instrument .controls-line,#instrument #fuel{display:none}#machines{bottom:6px;left:50%;width:98%;justify-content:center;gap:3px}#machines button{min-width:0;flex:1;max-width:94px;padding:5px;font-size:10px;border-radius:8px;text-align:center;align-items:center}#machines small{font-size:8px}#machines b{font-size:10px}.mach-n{font-size:13px}#touch{display:block}.pad{bottom:64px;left:6px;grid-template-columns:repeat(3,41px);gap:2px}.pad button{min-width:40px;min-height:40px;border-radius:9px}.actions{bottom:64px;right:6px;grid-template-columns:repeat(3,42px);gap:2px}.actions button{min-width:42px;min-height:41px!important;padding:2px;border-radius:9px;font-size:9px!important}.actions .work{min-height:38px!important}#notify{top:60px;font-size:11px}.modal{padding:18px}.modal h2{font-size:23px}}
 #rendererTag{position:absolute;left:50%;top:16px;transform:translateX(-50%);z-index:5;font:700 10px system-ui;letter-spacing:.12em;color:#fff;background:rgba(14,25,27,.52);border:1px solid rgba(255,255,255,.18);border-radius:99px;padding:7px 15px;pointer-events:none} @media(max-width:700px){#rendererTag{display:none}}#missionToggle{display:none}@media(max-width:700px){#missionToggle{display:block;background:#213440;color:#ffdaa2;border:1px solid #fff3;border-radius:10px;padding:6px 11px;width:100%;font-weight:700;cursor:pointer}#panel.compact{top:110px;max-height:128px}#panel.compact .mission{padding:7px 10px}#panel.compact .mission p,#panel.compact #tasks,#panel.compact .hint,#panel.compact .bar{display:none}#panel.compact .mission h2{font-size:14px;margin:2px}#panel.compact .kicker{font-size:9px}#panel.compact .progress-row{font-size:10px}}
 </style></head><body>
-<canvas id="viewport" aria-label="عالم موقع البناء ثلاثي الأبعاد"></canvas><div id="shade"></div><span id="rendererTag" aria-hidden="true">V5 · TEXTURED WORLD</span><div id="crosshair"></div>
-<header class="topbar"><div class="logo"><div class="mark">BC</div><div><h1>BIM CITY</h1><small>CONSTRUCTION OPERATIONS · V5</small></div></div><div class="top-metrics"><div class="metric"><small>رصيد الشركة</small><b id="wallet">45,000 SAR</b></div><div class="metric"><small>سمعة المقاول</small><b id="rep">★ 0</b></div></div><button id="shopBtn" class="outline-btn">الورشة</button><button id="helpBtn" class="outline-btn">؟</button></header>
+<canvas id="viewport" aria-label="عالم موقع البناء ثلاثي الأبعاد"></canvas><div id="shade"></div><span id="rendererTag" aria-hidden="true">V6 · EARTHWORK SIM</span><div id="crosshair"></div>
+<header class="topbar"><div class="logo"><div class="mark">BC</div><div><h1>BIM CITY</h1><small>CONSTRUCTION OPERATIONS · V6</small></div></div><div class="top-metrics"><div class="metric"><small>رصيد الشركة</small><b id="wallet">45,000 SAR</b></div><div class="metric"><small>سمعة المقاول</small><b id="rep">★ 0</b></div></div><button id="shopBtn" class="outline-btn">الورشة</button><button id="helpBtn" class="outline-btn">؟</button></header>
 <aside id="panel"><button id="missionToggle" type="button" aria-expanded="false">المهمة الحالية ▾</button><div class="mission glass"><div class="kicker" id="contractLabel">عقد 01 · DEVELOPMENT ZONE</div><h2 id="missionTitle">الحفر والتحميل</h2><p id="missionDesc">قم بتشغيل الحفّار واملأ الشاحنة بالتربة.</p><div class="progress-row"><span>إنجاز العقد</span><b id="percentage">0%</b></div><div class="bar"><i id="stageFill"></i></div><div id="tasks"></div><div class="hint" id="hint">شغّل الحفّار وابدأ الحفر.</div></div></aside>
 <div id="minimap"><canvas width="230" height="230" id="map"></canvas><strong>PROJECT MAP · N</strong></div>
 <div id="instrument" class="glass"><div class="instrument-label" id="instrumentName">EXCAVATOR • E-01</div><div class="speed"><b id="speed">0</b><span id="speedUnit">km/h</span></div><div id="fuel">⛽ الوقود: <span id="fuelPct">98</span>%</div><div class="controls-line" id="dynamicControls"></div></div>
@@ -268,8 +268,8 @@ const JOBS=[
  {name:'تركيب الكمرات بالرافعة',desc:'شغّل الرافعة البرجية، وحرّك الخطاف فوق مخزن القطع. أنزله لالتقاط الكمرة ثم انقلها فوق موضع التركيب المحدد وأنزلها بعناية.',target:2,unit:'كمرة',reward:22000}
 ];
 const SAVE='bim-city-construction-operations-v3';
-const defaults=()=>({contract:1,phase:0,cash:45000,rep:0,earned:0,upgrades:{hydraulics:0,capacity:0,motor:0},excavated:0,truckLoad:0,bucket:0,delivered:0,poured:0,placed:0,carry:false,remainingConcrete:10,safety:100,completed:0});
-let data=defaults();try{const stored=JSON.parse(localStorage.getItem(SAVE)||'null');if(stored&&Number.isFinite(stored.cash))data={...defaults(),...stored,upgrades:{...defaults().upgrades,...stored.upgrades}}}catch{}
+const defaults=()=>({contract:1,phase:0,cash:45000,rep:0,earned:0,upgrades:{hydraulics:0,capacity:0,motor:0},excavated:0,truckLoad:0,bucket:0,delivered:0,poured:0,placed:0,carry:false,remainingConcrete:10,safety:100,completed:0,terrainCuts:[]});
+let data=defaults();try{const stored=JSON.parse(localStorage.getItem(SAVE)||'null');if(stored&&Number.isFinite(stored.cash))data={...defaults(),...stored,terrainCuts:Array.isArray(stored.terrainCuts)?stored.terrainCuts.slice(0,80):(stored.excavated>0?[[0,0,stored.excavated]]:[]),upgrades:{...defaults().upgrades,...stored.upgrades}}}catch{}
 const machines={
  excavator:{x:-9,z:3.2,yaw:0,speed:0,fuel:98,swing:0,boom:.14,stick:.94,curl:.12},
  truck:{x:0,z:3.5,yaw:0,speed:0,fuel:95,bed:0},
@@ -288,10 +288,47 @@ function stageCompletion(){if(data.phase===0&&data.truckLoad>=8-.01){nextPhase()
 function nextPhase(){const stage=JOBS[data.phase];award(stage.reward);data.rep+=4;data.phase++;save();beep(920,.20);alertText('تم اعتماد المرحلة. مكافأتك '+money(stage.reward)+' ريال');if(data.phase===1)switchMachine('truck');if(data.phase===2)switchMachine('mixer');if(data.phase===3)switchMachine('crane');drawHUD()}
 function money(v){return Math.round(v).toLocaleString('en-US')}
 function tip(){const m=machines.excavator;const dir=m.yaw+m.swing,L=4+6*m.stick;return{x:m.x+Math.sin(dir)*L,z:m.z-Math.cos(dir)*L,y:1.08+4.6*m.boom-.65*m.curl}}
+// V6: terrain is a real, saved heightfield; each scoop cuts where the bucket reached.
+const TERRAIN_GRID=17, TERRAIN_RADIUS=5.2, TERRAIN_STEP=2*TERRAIN_RADIUS/(TERRAIN_GRID-1);
+function recordTerrainCut(x,z,volume){
+  if(!Number.isFinite(x)||!Number.isFinite(z)||volume<=0)return;
+  const xx=clamp(x-SITE.pit.x,-3.4,3.4),zz=clamp(z-SITE.pit.z,-3.8,3.8);
+  data.terrainCuts.push([Math.round(xx*100)/100,Math.round(zz*100)/100,volume]);
+  if(data.terrainCuts.length>80)data.terrainCuts=data.terrainCuts.slice(-80);
+}
+function excavationHeight(x,z){
+  const dx=x-SITE.pit.x,dz=z-SITE.pit.z;
+  const rim=Math.max(Math.abs(dx)/4.4,Math.abs(dz)/4.8);
+  if(rim>=1)return -.26;
+  let depth=0;
+  const cuts=data.terrainCuts.length?data.terrainCuts:[[0,0,(data.excavated||0)]];
+  for(const [cx,cz,volume] of cuts){
+    // Integrating a gaussian over the horizontal plane approximates the cubic meters removed.
+    const d2=(dx-cx)**2+(dz-cz)**2;
+    depth+=Math.min(8,Math.max(0,volume))*Math.exp(-d2/2.4)/(Math.PI*2.4);
+  }
+  const eased=Math.pow(Math.min(1,(1-rim)*4),1.4);
+  return -.26-Math.min(2.7,depth)*eased;
+}
+function drawExcavatedGround(){
+  const x0=SITE.pit.x-TERRAIN_RADIUS,z0=SITE.pit.z-TERRAIN_RADIUS;
+  for(let i=0;i<TERRAIN_GRID-1;i++)for(let j=0;j<TERRAIN_GRID-1;j++){
+    const x=x0+i*TERRAIN_STEP,z=z0+j*TERRAIN_STEP,X=x+TERRAIN_STEP,Z=z+TERRAIN_STEP;
+    const a=[x,excavationHeight(x,z),z],b=[X,excavationHeight(X,z),z],
+          c=[X,excavationHeight(X,Z),Z],d=[x,excavationHeight(x,Z),Z];
+    const avg=(a[1]+b[1]+c[1]+d[1])/4;
+    renderer.quad(a,d,c,b,avg<-.53?'#66503b':'#978067');
+  }
+  // Soil stockpile tracks true excavated volume; marked stakes frame excavation limits.
+  for(let n=0;n<4;n++){
+    const x=SITE.pit.x+(n%2?4.6:-4.6),z=SITE.pit.z+(n>1?5.0:-5.0);
+    renderer.tube3([[x,-.10,z],[x,.9,z]],.035,'#ddbb82',6);
+  }
+}
 function truckBed(){const m=machines.truck;return{x:m.x-Math.sin(m.yaw)*1.6,z:m.z+Math.cos(m.yaw)*1.6}}
 function hookPoint(){const m=machines.crane;return{x:m.x+Math.sin(m.yaw)*m.trolley,z:m.z-Math.cos(m.yaw)*m.trolley,y:m.hook}}
 function work(){if(paused||!started)return;const m=machines[machine];if(machine==='excavator'){
- const p=tip();if(data.bucket<=0){if(data.phase!==0){alertText('انتهت أعمال الحفر في هذا العقد');return}if(data.excavated>=8){alertText('الحفرة مكتملة؛ وجّه الدلو إلى الشاحنة');return}if(!near(p.x,p.z,SITE.pit,2.6)||p.y>2.2){alertText('ضع طرف الدلو داخل حفرة الحفر وأنزله تحت منسوب 2.2 متر',true);return}data.bucket=Math.min(2+data.upgrades.capacity,8-data.excavated);data.excavated+=data.bucket;data.cash+=360;beep(180,.19);alertText(`تم استخراج ${data.bucket} م³ من التربة. ارفع الذراع ودوّرها فوق الشاحنة.`)}
+ const p=tip();if(data.bucket<=0){if(data.phase!==0){alertText('انتهت أعمال الحفر في هذا العقد');return}if(data.excavated>=8){alertText('الحفرة مكتملة؛ وجّه الدلو إلى الشاحنة');return}if(!near(p.x,p.z,SITE.pit,2.6)||p.y>2.2){alertText('ضع طرف الدلو داخل حفرة الحفر وأنزله تحت منسوب 2.2 متر',true);return}data.bucket=Math.min(2+data.upgrades.capacity,8-data.excavated);data.excavated+=data.bucket;recordTerrainCut(p.x,p.z,data.bucket);data.cash+=360;beep(180,.19);alertText(`تم استخراج ${data.bucket} م³ من التربة. ارفع الذراع ودوّرها فوق الشاحنة.`)}
  else{const b=truckBed();if(machines.truck.speed>1||!near(p.x,p.z,b,4.5)||p.y<2.35){alertText('يجب أن يكون الدلو مرتفعًا فوق صندوق الشاحنة المتوقفة',true);return}const amount=Math.min(8-data.truckLoad,data.bucket);data.truckLoad+=amount;data.bucket-=amount;award(450);alertText('تم تحميل '+amount.toFixed(1)+' م³ في الشاحنة');stageCompletion();}save();drawHUD();return;}
  if(machine==='truck'){if(data.phase!==1){alertText('مهمة الشاحنة الحالية: نقل التربة عند بدء مرحلة النقل');return}if(!near(m.x,m.z,SITE.dump,12)||Math.abs(m.speed)>1.8){alertText('أوقف الشاحنة داخل منطقة تفريغ التربة الصفراء',true);return}if(data.truckLoad<.1){alertText('الصندوق فارغ',true);return}data.delivered+=data.truckLoad;data.truckLoad=0;m.bed=1;beep(240,.25);alertText('تم تفريغ التربة بنجاح');stageCompletion();save();return;}
  if(machine==='mixer'){if(data.phase!==2){alertText('ابدأ مرحلة الخرسانة أولًا');return}if(!near(m.x,m.z,SITE.pad,12)||Math.abs(m.speed)>1.6){alertText('أوقف الخلاطة قرب حدود الأساسات باللون الأخضر',true);return}firing=!firing;alertText(firing?'بدأ ضخ الخرسانة. ابقَ متوقفًا حتى يكتمل الصب.':'توقف ضخ الخرسانة');return;}
@@ -324,7 +361,7 @@ function collision(x,z,px,pz){
 }
 function update(dt){if(paused)return;time+=dt;const m=machines[machine],conf=MODES[machine];if(machine==='crane'){
  m.yaw+=((held('e')?1:0)-(held('q')?1:0))*dt*(.68+data.upgrades.hydraulics*.14);m.trolley=clamp(m.trolley+((held('l')?1:0)-(held('j')?1:0))*dt*5,4.8,29);m.hook=clamp(m.hook+((held('i')?1:0)-(held('k')?1:0))*dt*7,1.1,30);}
- else{let drive=(held('w')?1:0)-(held('s')?1:0),steer=(held('d')?1:0)-(held('a')?1:0);const max=conf.max*(1+data.upgrades.motor*.17);m.speed=clamp(m.speed+drive*conf.acc*dt*1.8,-max*.55,max);if(drive===0)m.speed*=Math.pow(.93,dt*60);if(Math.abs(m.speed)<.025)m.speed=0;
+ else{let drive=(held('w')?1:0)-(held('s')?1:0),steer=(held('d')?1:0)-(held('a')?1:0);const max=conf.max*(1+data.upgrades.motor*.17);const loadRatio=machine==='truck'?clamp(data.truckLoad/8,0,1):0;const loadedAccel=1-.43*loadRatio;const loadedDrag=.93+.035*loadRatio;m.speed=clamp(m.speed+drive*conf.acc*dt*1.8*loadedAccel,-max*.55,max*(1-.15*loadRatio));if(drive===0)m.speed*=Math.pow(loadedDrag,dt*60);if(Math.abs(m.speed)<.025)m.speed=0;
  m.yaw+=steer*conf.turn*dt*(.25+.75*Math.min(1,Math.abs(m.speed)/3.5))*Math.sign(m.speed||1);const nx=clamp(m.x+Math.sin(m.yaw)*m.speed*dt,-130,130),nz=clamp(m.z-Math.cos(m.yaw)*m.speed*dt,-130,130);
  // Positive D/right steers toward +X when moving forward. Prevent moving through large structures.
  const obstructed=collision(nx,nz,m.x,m.z);
@@ -396,7 +433,7 @@ function fence(){for(let x=-29;x<=29;x+=4){for(let z of [-26,26]){box(x,.95,z,.1
 function cone(x,z,s=1){renderer.cylinder(x,.35*s,z,.03*s,.45*s,.7*s,'#e58048',8);cylinder(x,.03,z,.48*s,.12,'#252f31',7)}
 function siteGround(){box(-3,-.36,-3,57,.16,52,'#877e71');box(-4,-.30,-8,39,.08,33,'#84796b');for(let n=0;n<85;n++){const x=-27+seeded(n+3)*54,z=-25+seeded(n+89)*49;box(x,-.23,z,.15+seeded(n+4)*.7,.08,.2+seeded(n+7)*.9,n%3?'#9b876d':'#a89578',seeded(n)*3)}fence();
  // Excavation: wall cut visibly deepens as progress grows.
- const depth=.25+data.excavated/8*1.85;box(SITE.pit.x,-.30-depth*.42,SITE.pit.z,8,.12+depth,9,'#5c4937');box(SITE.pit.x,-.36,SITE.pit.z-4.8,9,.20,.25,'#b4946e');box(SITE.pit.x,-.36,SITE.pit.z+4.8,9,.20,.25,'#b4946e');box(SITE.pit.x-4.3,-.35,SITE.pit.z,.25,.20,9,'#b4946e');box(SITE.pit.x+4.3,-.35,SITE.pit.z,.25,.20,9,'#b4946e');
+ drawExcavatedGround();box(SITE.pit.x,-.36,SITE.pit.z-4.8,9,.20,.25,'#b4946e');box(SITE.pit.x,-.36,SITE.pit.z+4.8,9,.20,.25,'#b4946e');box(SITE.pit.x-4.3,-.35,SITE.pit.z,.25,.20,9,'#b4946e');box(SITE.pit.x+4.3,-.35,SITE.pit.z,.25,.20,9,'#b4946e');
  // Foundation pad, formwork and rebar.
  box(SITE.pad.x,-.30,SITE.pad.z,15,.12,14,'#a08c70');for(let s of [-1,1]){box(SITE.pad.x+s*7.1,.20,SITE.pad.z,.24,.75,14,'#c18c52');box(SITE.pad.x,.20,SITE.pad.z+s*7.1,14,.75,.24,'#c18c52')}for(let i=-6;i<=6;i+=1.8){box(SITE.pad.x+i,-.12,SITE.pad.z,.065,.09,13.7,'#8a7460');box(SITE.pad.x,-.12,SITE.pad.z+i,13.7,.09,.065,'#8a7460')}
  if(data.poured>0){box(SITE.pad.x,-.31+Math.min(1,data.poured/10)*.27,SITE.pad.z,13.85,Math.min(.5,data.poured/10*.5),13.85,'#c7cbc4')}
@@ -567,7 +604,7 @@ function drawMap(){const c=$('map'),ctx=c.getContext('2d');if(!ctx)return;const 
 }
 function drawHUD(){const job=JOBS[Math.min(3,data.phase)];$('wallet').textContent=money(data.cash)+' SAR';$('rep').textContent='★ '+data.rep;$('shopBtn').textContent=data.phase>=4?'عقد جديد':'الورشة';$('contractLabel').textContent='عقد '+String(data.contract).padStart(2,'0')+' · NORTHERN DISTRICT';$('missionTitle').textContent=job.name;$('missionDesc').textContent=job.desc;
  const current=prog(),pct=Math.round(clamp(current/job.target,0,1)*100),overall=Math.round(clamp((data.phase*100+pct)/4,0,100));$('percentage').textContent=overall+'%';$('stageFill').style.width=overall+'%';let items=[];
- if(data.phase===0){items=[['التربة المستخرجة',data.excavated.toFixed(1)+'/8 م³'],['حمولة الشاحنة',data.truckLoad.toFixed(1)+'/8 م³'],['الدلو',data.bucket.toFixed(1)+' م³']]}
+ if(data.phase===0){items=[['التربة المستخرجة',data.excavated.toFixed(1)+'/8 م³'],['حمولة الشاحنة',data.truckLoad.toFixed(1)+'/8 م³'],['الدلو',data.bucket.toFixed(1)+' م³'],['عمق الحفرة',Math.abs(Math.min(-.26,excavationHeight(SITE.pit.x,SITE.pit.z))+.26).toFixed(2)+' م']]}
  if(data.phase===1){items=[['نقل التربة',data.delivered.toFixed(1)+'/8 م³'],['الحمولة الحالية',data.truckLoad.toFixed(1)+' م³']]}
  if(data.phase===2){items=[['الخرسانة المصبوبة',data.poured.toFixed(1)+'/10 م³'],['المتبقي',Math.max(0,10-data.poured).toFixed(1)+' م³']]}
  if(data.phase===3){items=[['الكمرات المركّبة',data.placed+'/2'],['الكمرة معلّقة',data.carry?'نعم':'لا']]}
@@ -576,7 +613,7 @@ function drawHUD(){const job=JOBS[Math.min(3,data.phase)];$('wallet').textConten
  $('instrumentName').textContent=MODES[machine].en;$('speed').textContent=Math.round(Math.abs(machines[machine].speed)*3.6);$('speedUnit').textContent=machine==='crane'?'TOWER CRANE':'km/h';$('fuelPct').textContent=Math.round(machines[machine].fuel);
  $('dynamicControls').textContent=machine==='excavator'?'Q/E دوران · I/K رفع · J/L امتداد · U/O الدلو · F حفر/تفريغ':machine==='crane'?'Q/E دوران · I/K الخطاف · J/L العربة · F تعليق/تركيب':'W/S حركة · A/D دوران · F تشغيل المهمة';
  document.querySelectorAll('#machines button').forEach(b=>b.classList.toggle('active',b.dataset.machine===machine));drawMap()}
-function startNext(){data.contract++;data.phase=0;data.excavated=0;data.truckLoad=0;data.bucket=0;data.delivered=0;data.poured=0;data.placed=0;data.carry=false;data.remainingConcrete=10;
+function startNext(){data.contract++;data.phase=0;data.excavated=0;data.truckLoad=0;data.bucket=0;data.delivered=0;data.poured=0;data.placed=0;data.carry=false;data.remainingConcrete=10;data.terrainCuts=[];
  Object.assign(machines.excavator,{x:-9,z:3.2,yaw:0,speed:0,swing:0,boom:.14,stick:.94,curl:.12});Object.assign(machines.truck,{x:0,z:3.5,yaw:0,speed:0});Object.assign(machines.mixer,{x:14,z:13,yaw:0,speed:0});Object.assign(machines.crane,{yaw:1.46,hook:3,trolley:9.4});$('win').hidden=true;paused=false;save();switchMachine('excavator');alertText('بدأ عقد جديد. استخدم المعدات لتنفيذ أعمال الموقع.')}
 const upgrades=[{id:'hydraulics',title:'كفاءة النظام الهيدروليكي',description:'زيادة سرعة ذراع الحفّار ودوران الرافعة بنسبة 20% لكل مستوى',base:10000},{id:'capacity',title:'دلو حفر أكبر',description:'إضافة 1 م³ إلى سعة الدلو لكل مستوى',base:13000},{id:'motor',title:'المحرك وناقل الحركة',description:'زيادة السرعة القصوى للمعدات المتحركة بنسبة 17%',base:9000}];
 function shopUI(){$('shopList').innerHTML=upgrades.map(u=>{const lvl=data.upgrades[u.id],price=Math.round(u.base*(1+lvl*.85));return `<div class="shopline"><div><b>${u.title}</b><small>${u.description}<br>المستوى: ${lvl}/4</small></div><button data-up="${u.id}" ${lvl>=4||data.cash<price?'disabled':''}>${lvl>=4?'مكتمل':money(price)+' ريال'}</button></div>`}).join('');$('shopList').querySelectorAll('[data-up]').forEach(e=>e.onclick=()=>{const u=upgrades.find(v=>v.id===e.dataset.up),lvl=data.upgrades[u.id],price=Math.round(u.base*(1+lvl*.85));if(lvl>=4||data.cash<price)return;data.cash-=price;data.upgrades[u.id]++;save();shopUI();drawHUD();beep(520,.21);alertText('تم شراء تطوير '+u.title)})}
